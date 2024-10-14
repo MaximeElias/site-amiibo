@@ -67,6 +67,7 @@ button:hover {
     object-fit: cover;
     display: block;
     margin: 0 auto;
+    padding: 1rem;
 }
 
 @media (max-width: 950px) {
