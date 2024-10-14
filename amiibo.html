@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultats de recherche Amiibo</title>
+    <link rel="stylesheet" href="styles/style.css"> 
+</head>
+<body>
+    <header>
+        <h1>Résultats de recherche</h1>
+    </header>
+    <main>
+        <div id="resultats">
+            <!-- Les résultats de la recherche apparaîtront ici -->
+        </div>
+    </main>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchTerm = urlParams.get('search');
+
+        console.log('Termes de recherche:', searchTerm); // Vérifiez ce qui est passé comme paramètre
+
+        if (searchTerm) {
+            fetch(`https://amiiboapi.com/api/amiibo/?name=${encodeURIComponent(searchTerm)}`) // Utilisation de encodeURIComponent pour sécuriser le terme de recherche
+                .then(response => {
+                    console.log('Réponse de l\'API:', response); // Log de la réponse brute
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la récupération des données : ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Données récupérées:', data); // Log des données récupérées
+                    const resultatsDiv = document.getElementById('resultats');
+
+                    // Filtrer les Amiibo de type 'Figure'
+                    const figures = data.amiibo.filter(amiibo => amiibo.type === 'Figure');
+
+                    if (figures.length > 0) {
+                        figures.forEach(amiibo => {
+                            const amiiboDiv = document.createElement('div');
+                            amiiboDiv.classList.add('amiibo');
+                            amiiboDiv.innerHTML = `
+                                <h2>${amiibo.name}</h2>
+                                <img src="${amiibo.image}" alt="${amiibo.name}">
+                                <p>Jeux associés : ${amiibo.amiiboSeries ? amiibo.amiiboSeries : 'Aucun jeu associé'}</p>
+                            `;
+                            resultatsDiv.appendChild(amiiboDiv);
+                        });
+                    } else {
+                        resultatsDiv.innerHTML = '<p>Aucun Amiibo de type "Figure" trouvé.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    document.getElementById('resultats').innerHTML = '<p>Erreur lors de la récupération des données.</p>';
+                });
+        } else {
+            document.getElementById('resultats').innerHTML = '<p>Veuillez entrer un nom d\'Amiibo.</p>';
+        }
+    </script>      
+</body>
+</html>
